@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #__next {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  background: linear-gradient(180deg,#f2f6f8 0%, #ffffff 100%);
+}
+
+/* chat specific */
+.chat-container { max-width: 720px; margin: 24px auto; background: #f9fafb; border-radius: 12px; box-shadow: 0 6px 18px rgba(16,24,40,0.06); overflow: hidden; }
+.header { background: linear-gradient(90deg,#075e54,#128C7E); color: white; padding: 12px 16px; }
+.message-list { height: 60vh; padding: 16px; overflow-y: auto; background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(248,250,252,0.8)); }
+.bubble-sent { background: var(--bubbleSent, #dcf8c6); padding: 12px 16px; border-radius: 18px 18px 4px 18px; max-width: 70%; }
+.bubble-recv { background: var(--bubbleRecv, #ffffff); padding: 12px 16px; border-radius: 18px 18px 18px 4px; max-width: 70%; }
+
+/* sentiments applied */
+.bubble-sent.has-sentiment, .bubble-recv.has-sentiment {
+  border: 1px solid rgba(0,0,0,0.04);
+  box-shadow: 0 8px 20px rgba(2,6,23,0.06);
+  color: inherit; /* text color set inline for contrast */
+}
+
+/* sentiment badge positioning adjustments */
+.bubble-sent.has-sentiment { padding-right: 22px; }
+.bubble-recv.has-sentiment { padding-left: 22px; }
+.input-area { padding: 12px; display: flex; gap: 8px; align-items: center; border-top: 1px solid #eee; }
+.fab { width: 48px; height: 48px; border-radius: 50%; background: #25D366; display:flex; align-items:center; justify-content:center; color: white; box-shadow: 0 6px 12px rgba(37, 211, 102, 0.25); }
+.typing { font-size: 12px; color: #7b7b7b; }
+
+/* reactions */
+.reaction-pulse { transform-origin: center; }
+.reaction-aggregate { position: relative; display: inline-flex; gap: 6px; }
+

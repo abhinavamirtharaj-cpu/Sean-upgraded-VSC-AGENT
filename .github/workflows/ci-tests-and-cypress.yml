@@ -1,0 +1,69 @@
+name: CI - Tests & Cypress
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+        os: [ubuntu-latest]
+    services: {}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Cache frontend node_modules
+        uses: actions/cache@v4
+        with:
+          path: frontend/node_modules
+          key: frontend-node-modules-${{ matrix.node-version }}-${{ github.sha }}
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Cache backend node_modules
+        uses: actions/cache@v4
+        with:
+          path: backend/node_modules
+          key: backend-node-modules-${{ matrix.node-version }}-${{ github.sha }}
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Start backend server in background
+        run: |
+          cd backend
+          nohup bash -c "npm run dev" > backend.log 2>&1 &
+          echo "waiting for backend health..."
+          for i in `seq 1 60`; do if curl -sS http://localhost:3001/health >/dev/null 2>&1; then echo "backend ready"; exit 0; fi; sleep 1; done; echo "backend failed to start"; cat backend.log; exit 1
+
+      - name: Run Cypress E2E (record artifacts)
+        env:
+          CI: true
+        run: |
+          cd frontend
+          npx cypress run --spec "cypress/e2e/**/*.spec.ts"
+
+      - name: Upload Cypress video/artifacts
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: cypress-artifacts
+          path: frontend/cypress/videos || frontend/cypress/screenshots || frontend/cypress/results || ''

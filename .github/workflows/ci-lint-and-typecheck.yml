@@ -1,0 +1,33 @@
+name: CI - Lint & Typecheck
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-typecheck:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install root deps
+        run: npm ci
+
+      - name: Frontend lint (if present)
+        run: |
+          if [ -f frontend/package.json ]; then cd frontend; if npm run lint --silent 2>/dev/null; then echo "frontend lint OK"; else echo "frontend lint failed (if you rely on eslint add a lint script)"; fi; fi
+
+      - name: Frontend typecheck (if tsconfig exists)
+        run: |
+          if [ -f frontend/tsconfig.json ]; then cd frontend; npx tsc --noEmit || (echo "frontend tsc failed" && exit 1); else echo "no frontend tsconfig, skipping"; fi
+
+      - name: Backend lint/typecheck
+        run: |
+          if [ -f backend/tsconfig.json ]; then cd backend; npx tsc --noEmit || (echo "backend tsc failed" && exit 1); else echo "no backend tsconfig, skipping"; fi

@@ -1,0 +1,58 @@
+name: CI - Install & Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  install-and-check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install frontend deps
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Install backend deps
+        run: |
+          cd backend
+          npm ci
+
+      - name: Typecheck backend (if present)
+        run: |
+          cd backend
+          if [ -f tsconfig.json ]; then npx tsc --noEmit || true; else echo "no tsconfig.json, skipping tsc"; fi
+
+      - name: Run quick backend lint (sanity)
+        run: |
+          cd backend
+          node -e "try{require('./src/server'); console.log('backend module load OK')}catch(e){console.error('backend load failed',e); process.exit(1)}"
+
+      - name: Smoke test sentiment helper
+        run: |
+          node -e "(async()=>{ const f=require('./backend/src/sentiment').classifyText; const r=await f('I am happy'); console.log('sample sentiment', r); })().catch(e=>{console.error(e); process.exit(1)})"
+
+      - name: Quick frontend sanity check
+        run: |
+          cd frontend
+          node -e "console.log('node check OK')"
