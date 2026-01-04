@@ -4,21 +4,19 @@
   "private": true,
   "scripts": {
     "dev": "bash scripts/start-dev.sh",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "test-verify-prekey": "node scripts/test-verify-prekey.js",
+    "test-prekeys-endpoint": "node scripts/test-prekeys-endpoint.js"
   },
   "dependencies": {
     "express": "^4.18.2",
     "socket.io": "^4.8.0",
     "ioredis": "^5.3.2",
-    "pg": "^8.11.0"
+    "pg": "^8.11.0",
+    "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.0.0",
-    "tweetnacl": "^1.0.3"
-  },
-  "scripts": {
-    "dev": "bash scripts/start-dev.sh",
-    "test-verify-prekey": "node scripts/test-verify-prekey.js"
+    "typescript": "^5.0.0"
   }
 }
