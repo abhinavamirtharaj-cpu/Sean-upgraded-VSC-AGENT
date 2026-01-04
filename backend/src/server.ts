@@ -121,6 +121,25 @@ app.post('/prekeys', express.json(), async (req, res) => {
   const { username, identityKey, signedPreKey, preKey, meta } = req.body as { username?: string; identityKey?: string; signedPreKey?: any; preKey?: any; meta?: any };
   if (!username || !identityKey || !signedPreKey) return res.status(400).json({ error: 'username, identityKey and signedPreKey required' });
   const storeVal = { identityKey, signedPreKey, preKey, meta, createdAt: Date.now() };
+
+  // If a signedPreKey signature is present, verify it using identityKey before accepting
+  try {
+    const { verifySignedPreKey } = require('./cryptoHelpers');
+    if (signedPreKey && signedPreKey.signature) {
+      const ok = verifySignedPreKey(
+        // identityKey can be object or string depending on client; normalize to base64 string
+        typeof identityKey === 'string' ? identityKey : (identityKey.pubKey || identityKey.publicKey || JSON.stringify(identityKey)),
+        signedPreKey.publicKey || signedPreKey.pubKey || signedPreKey,
+        signedPreKey.signature
+      );
+      if (!ok) return res.status(400).json({ error: 'invalid signedPreKey signature' });
+    }
+  } catch (err) {
+    console.warn('signedPreKey verification step failed unexpectedly', err);
+    // continue but do not accept unsigned/invalid bundle
+    return res.status(400).json({ error: 'signedPreKey verification not available' });
+  }
+
   preKeyBundles.set(username, storeVal);
   try {
     await savePrekeyBundleToDb(username, storeVal);

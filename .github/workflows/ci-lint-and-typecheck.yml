@@ -31,3 +31,7 @@ jobs:
       - name: Backend lint/typecheck
         run: |
           if [ -f backend/tsconfig.json ]; then cd backend; npx tsc --noEmit || (echo "backend tsc failed" && exit 1); else echo "no backend tsconfig, skipping"; fi
+
+      - name: Backend prekey verification unit test
+        run: |
+          if [ -f backend/scripts/test-verify-prekey.js ]; then cd backend; node scripts/test-verify-prekey.js || (echo "prekey verification test failed" && exit 1); else echo "no prekey verification test found, skipping"; fi
