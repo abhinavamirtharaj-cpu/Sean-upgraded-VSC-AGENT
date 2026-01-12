@@ -9,7 +9,7 @@
     "cypress:open": "cypress open",
     "cypress:run": "cypress run"
   },
-  "dependencies": {"},{
+  "dependencies": {
     "next": "15.0.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -21,7 +21,7 @@
     "clsx": "^1.2.1",
     "react-icons": "^4.8.0",
     "@lottiefiles/react-lottie-player": "^2.13.0"
-  }
+  },
   "devDependencies": {
     "cypress": "^12.0.0",
     "@cypress/vite-dev-server": "^1.0.0"
